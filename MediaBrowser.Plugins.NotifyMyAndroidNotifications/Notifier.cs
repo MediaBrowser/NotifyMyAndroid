@@ -40,7 +40,7 @@ namespace MediaBrowser.Plugins.NotifyMyAndroidNotifications
             get { return Plugin.Instance.Name; }
         }
 
-        public Task SendNotification(UserNotification request, CancellationToken cancellationToken)
+        public async Task SendNotification(UserNotification request, CancellationToken cancellationToken)
         {
             var options = GetOptions(request.User);
 
@@ -63,7 +63,18 @@ namespace MediaBrowser.Plugins.NotifyMyAndroidNotifications
 
             _logger.Debug("NotifyMyAndroid to {0} - {1} - {2}", options.Token, request.Name, request.Description);
 
-            return _httpClient.Post("https://www.notifymyandroid.com/publicapi/notify", parameters, cancellationToken);
+            var httpRequestOptions = new HttpRequestOptions
+            {
+                Url = "https://www.notifymyandroid.com/publicapi/notify",
+                CancellationToken = cancellationToken
+            };
+
+            httpRequestOptions.SetPostData(parameters);
+
+            using (await _httpClient.Post(httpRequestOptions).ConfigureAwait(false))
+            {
+
+            }
         }
 
         private bool IsValid(NotifyMyAndroidOptions options)
